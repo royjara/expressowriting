@@ -150,10 +150,11 @@ export default function Popup({
               width: "40%",
             }}
             onClick={() => {
-              addToDismiss(contents?.triggerword!, contents?.wordlocation!);
               db.highlights.update(1, {
                 active: false,
               });
+              addToDismiss(contents?.triggerword!, contents?.wordlocation!);
+              // need to update editor.
               closePopup();
             }}
           >

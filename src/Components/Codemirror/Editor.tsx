@@ -376,7 +376,7 @@ export function Editor({
       view.destroy();
       setView(null);
     };
-  }, [fetchedNote]);
+  }, [fetchedNote, dismisslist]);
 
   function handleTitleChange(e: React.FormEvent<HTMLInputElement>) {
     let newtitle: string = (e.target as HTMLInputElement).value;
