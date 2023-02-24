@@ -1,0 +1,133 @@
+.menu-sidebar {
+  z-index: 4;
+  flex: 1;
+  /* background-color: var(--bgcolshadow); */
+  background-color: rgba(235, 230, 255, 0.8);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border: var(--borderdebug) blue;
+  display: flex;
+  flex-direction: column;
+  color: var(--bgcollighter);
+  padding-left: 5px;
+  padding-right: 5px;
+  position: fixed;
+  height: 100%;
+  transition: left 0.4s;
+  left: 0px;
+  width: 260px;
+  overflow-wrap: break-word;
+}
+
+.menu-sidebar.off {
+  left: -230px;
+  transition: left 0.4s;
+}
+
+.menu-sidebar.off > * {
+  position: absolute;
+  top: 0px;
+  right: 0px;
+}
+
+.menu-sidebar header {
+  background-color: rgb(244, 241, 255);
+  /* backdrop-filter: blur(4px); */
+  /* -webkit-backdrop-filter: inherit; */
+  position: absolute;
+  left: 260px;
+  display: flex;
+  flex-direction: column;
+  height: fit-content;
+  justify-content: space-between;
+  margin-left: 10px;
+  width: fit-content;
+}
+
+.menu-sidebar header > * {
+  border: var(--borderdebug) rgb(106, 255, 250);
+  margin-top: 5px;
+}
+
+.menu-sidebar > * {
+  border: var(--borderdebug) rgb(255, 136, 0);
+}
+
+.menu-sidebar button {
+  align-self: center;
+}
+
+.notelist {
+  overflow-y: auto;
+  /* height: 54vh; */
+  display: flex;
+  flex-direction: column;
+  margin-top: 14px;
+  border: var(--borderdebug) rgba(248, 248, 248, 0.699);
+  align-items: flex-end;
+  color: #333;
+}
+
+.notebrief-container {
+  width: 100%;
+  display: flex;
+  justify-content: end;
+}
+
+.notebrief {
+  display: flex;
+  flex-direction: row;
+  width: 90%;
+  cursor: default;
+  background-color: #e7d7f4;
+  margin-top: 2px;
+}
+
+.notebrief.selected {
+  background-color: #d9baf1;
+  justify-self: start;
+  width: 100%;
+}
+
+.notebrief:hover {
+  /* background-color: black; */
+  background-color: #e0caf2;
+  width: 94%;
+}
+
+.notebrief .title {
+  margin: 0px;
+  flex-grow: 4;
+  text-align: left;
+  padding-left: 10px;
+  align-self: center;
+  border: var(--borderdebug) rgba(255, 0, 200, 0.699);
+}
+
+.dateclose {
+  display: flex;
+  flex-direction: column;
+}
+
+.dateclose > * {
+  border: var(--borderdebug) rgba(255, 0, 200, 0.699);
+}
+
+.notebrief .date {
+  font-size: small;
+  color: #666;
+  margin-right: 6px;
+}
+
+.notebrief button {
+  background-color: unset;
+  border: none;
+  color: var(--bgcolmid);
+  cursor: pointer;
+  font-size: large;
+  align-self: center;
+}
+
+.notelist > * {
+  box-sizing: border-box;
+}

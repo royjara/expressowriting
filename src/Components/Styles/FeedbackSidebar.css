@@ -1,0 +1,80 @@
+.feedback-sidebar {
+  /* border: var(--borderdebug) blue; */
+  /* border-left: solid 3px var(--softgrey); */
+  /* box-shadow: 0px 0px 3px 3px var(--softgrey); */
+  /* background-color: var(--bgcollight); */
+  color: var(--bgcolshadow);
+  display: flex;
+  position: fixed;
+  right: 0;
+  flex-direction: column;
+  padding-left: 10px;
+  padding-right: 10px;
+  align-items: flex-start;
+  /* transition: right 0.7s; */
+  width: 26vw;
+  height: 100%;
+  overflow-y: scroll;
+  z-index: 5;
+}
+
+.feedback-sidebar.off {
+  right: calc(-26vw + 24px);
+}
+.feedback-sidebar.off > * {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+}
+
+.feedback-sidebar header {
+  align-items: flex-end;
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  width: 100%;
+}
+
+.feedback-sidebar header h1 {
+  align-self: center;
+}
+
+.Feedback {
+  /* border: 3px solid blue; */
+  flex: 1;
+  /* text-align: left; */
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.card {
+  width: 86%;
+  /* box-shadow: 0px 1px 10px 1px var(--softgrey); */
+  box-shadow: rgba(0, 0, 0, 0.2) 0px 3px 8px;
+  margin-top: 20px;
+  padding: 10px;
+}
+
+.card > * {
+  text-align: left;
+}
+
+.rewrite-btn {
+  margin-bottom: 16px;
+  margin-top: 16px;
+  align-self: center;
+}
+
+.feedback-sidebar.off > * {
+  border: var(--borderdebug) blue;
+}
+
+/* .feedback-sidebar.on > * {
+  border: var(--borderdebug) rgb(255, 157, 0);
+} */
+
+.feedback-sidebar.on header > * {
+  border: var(--borderdebug) rgb(131, 255, 122);
+}

@@ -1,0 +1,66 @@
+.note-header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  margin-bottom: 16px;
+  border: var(--borderdebug) orange;
+}
+
+.note-title {
+  /* border: 2px solid var(--highlight); */
+  background-color: unset;
+  border: none;
+  font-size: 42px;
+  /* border: var(--borderdebug) cyan; */
+  font-family: inherit;
+  color: rgb(74, 74, 74);
+  /* font-style: italic; */
+  width: 85%;
+}
+
+.note-title:focus {
+  outline: none;
+  text-decoration: underline;
+}
+
+.notifiers {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.notifiers p {
+  font-size: medium;
+  color: rgba(18, 18, 18, 0.506);
+  margin-right: 30px;
+  margin-top: 0;
+  text-align: left;
+  border: var(--borderdebug) blue;
+}
+
+.note-date {
+  font-size: medium;
+}
+
+.headerrow {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  border: var(--borderdebug) red;
+  width: 100%;
+}
+
+.featuretoggles {
+  border: var(--borderdebug) blue;
+  margin: 0;
+}
+
+.cm-atomic {
+  color: grey;
+  /* border-radius: 15%; */
+  width: fit-content;
+  cursor: default;
+  user-select: none;
+  /* padding-left: 3px; */
+  padding-right: 3px;
+}
