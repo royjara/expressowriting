@@ -129,7 +129,7 @@ export default function Menu({
                   </IconButton>
                 </Tooltip>
 
-                <Tooltip
+                {/* <Tooltip
                   title={<Typography fontSize={14}>New Entry</Typography>}
                   placement="right"
                 >
@@ -148,7 +148,7 @@ export default function Menu({
                   >
                     <NoteAddIcon sx={{ fontSize: "32px" }} />
                   </IconButton>
-                </Tooltip>
+                </Tooltip> */}
                 <Tooltip
                   title={<Typography fontSize={14}>Logs</Typography>}
                   placement="right"
@@ -175,6 +175,7 @@ export default function Menu({
                 </Tooltip>
                 {/* </ThemeProvider> */}
               </header>
+              <button className="newentrybutton">New</button>
               <NoteList
                 setCurrentNote={setCurrentNote}
                 setShowbar={setShowbar}
