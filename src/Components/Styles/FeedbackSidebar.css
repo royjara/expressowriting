@@ -78,3 +78,22 @@
 .feedback-sidebar.on header > * {
   border: var(--borderdebug) rgb(131, 255, 122);
 }
+
+
+/*  --------------------------------- */
+
+/* New: */
+
+.SidebarContainer {
+  position: absolute;
+  right: 0px;
+  display: flex;
+  flex-direction: column;
+  width: 25vw;
+  margin: 16px;
+  padding: 10px 10px 10px 10px;
+  overflow-y: hidden;
+  overflow-x: hidden;
+  outline: var(--borderdebug) blue;
+  height: 100%;
+}

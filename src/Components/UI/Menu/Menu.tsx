@@ -1,7 +1,16 @@
+/**
+ * Menu
+ *
+ * - see menu.css for styles
+ * - handles note management
+ */
+
 import React, { useEffect, useState } from "react";
-import "../Styles/Menu.css";
+import { db, downloadDB, downloadDBlite } from "../../Dexie/db";
+import NoteList from "./NoteList";
+
 import { IconButton, Tooltip, Typography } from "@mui/material";
-import { createTheme, ThemeProvider } from "@mui/material/styles";
+
 import NoteAddIcon from "@mui/icons-material/NoteAdd";
 import ClearIcon from "@mui/icons-material/Clear";
 import MenuIcon from "@mui/icons-material/Menu";
@@ -10,41 +19,18 @@ import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import DownloadForOfflineIcon from "@mui/icons-material/DownloadForOffline";
 
-import NoteList from "./NoteList";
-import { db, downloadDB, downloadDBlite } from "../Dexie/db";
-
-const theme = createTheme({
-  palette: {
-    primary: {
-      main: "#e6a1cf",
-    },
-    secondary: {
-      main: "#000059",
-    },
-  },
-});
-const theme2 = createTheme({
-  palette: {
-    primary: {
-      // main: "#e6a1cf",
-      main: "#333",
-    },
-    secondary: {
-      main: "#333",
-    },
-  },
-});
+import "../../Styles/Menu.css";
 
 interface MenuProps {
-  setCurrentNote: React.Dispatch<React.SetStateAction<number | null>>;
   currentNote: number | null;
+  setCurrentNote: React.Dispatch<React.SetStateAction<number | null>>;
   setShowmenu: React.Dispatch<React.SetStateAction<boolean>>;
   setViewHelp: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export default function Menu({
-  setCurrentNote,
   currentNote,
+  setCurrentNote,
   setShowmenu,
   setViewHelp,
 }: MenuProps) {
@@ -59,17 +45,16 @@ export default function Menu({
       .sort();
 
     try {
-      // add new blank note
       const id = await db.notes.add({
-        title: "New Entry " + untitled.length,
+        title: "New Entry" + (untitled.length > 0 ? " " + untitled.length : ""),
         content: "",
         creationdate: Date.now(),
         lastedit: Date.now(),
         timeduration: 0,
-        stats: {},
+        stats: {}, // not implemented
       });
 
-      console.log("added new note with id", id);
+      // console.log("added new note with id", id);
       return id;
     } catch (error) {
       console.log(`Failed to add new note: ${error}`);
@@ -87,23 +72,20 @@ export default function Menu({
         {
           hide: (
             <div className="menu-sidebar off">
-              <ThemeProvider theme={theme2}>
-                <IconButton
-                  onClick={() => {
-                    setShowbar(showbar === "hide" ? "show" : "hide");
-                  }}
-                  aria-label="delete"
-                  color="default"
-                >
-                  <MenuIcon />
-                </IconButton>
-              </ThemeProvider>
+              <IconButton
+                onClick={() => {
+                  setShowbar(showbar === "hide" ? "show" : "hide");
+                }}
+                aria-label="delete"
+                color="default"
+              >
+                <MenuIcon />
+              </IconButton>
             </div>
           ),
           show: (
             <div className="menu-sidebar on">
               <header>
-                {/* <ThemeProvider theme={theme2}> */}
                 <IconButton
                   onClick={() => {
                     setShowbar(showbar === "hide" ? "show" : "hide");
@@ -129,7 +111,7 @@ export default function Menu({
                   </IconButton>
                 </Tooltip>
 
-                {/* <Tooltip
+                <Tooltip
                   title={<Typography fontSize={14}>New Entry</Typography>}
                   placement="right"
                 >
@@ -139,7 +121,6 @@ export default function Menu({
                     onClick={() => {
                       addNote().then((id) => {
                         if (id) {
-                          // console.log("in promise chain");
                           setCurrentNote(id as number);
                           setShowbar("hide");
                         }
@@ -148,7 +129,7 @@ export default function Menu({
                   >
                     <NoteAddIcon sx={{ fontSize: "32px" }} />
                   </IconButton>
-                </Tooltip> */}
+                </Tooltip>
                 <Tooltip
                   title={<Typography fontSize={14}>Logs</Typography>}
                   placement="right"
@@ -173,46 +154,24 @@ export default function Menu({
                     <DownloadForOfflineIcon sx={{ fontSize: "32px" }} />
                   </IconButton>
                 </Tooltip>
-                {/* </ThemeProvider> */}
               </header>
-              <button className="newentrybutton">New</button>
+              {/* <button className="newentrybutton" >New</button> */}
               <NoteList
                 setCurrentNote={setCurrentNote}
                 setShowbar={setShowbar}
                 currentNote={currentNote}
               />
-              <>
-                <div
-                  style={{
-                    position: "absolute",
-                    width: "230px",
-                    bottom: "0px",
-                    right: "30px",
-                    display: "flex",
-                    alignItems: "center",
+              <div className="menu-footer">
+                <IconButton
+                  color="default"
+                  onClick={() => {
+                    setViewHelp(true);
                   }}
                 >
-                  <ThemeProvider theme={theme2}>
-                    <IconButton
-                      color="primary"
-                      onClick={() => {
-                        setViewHelp(true);
-                      }}
-                    >
-                      <HelpOutlineIcon />
-                    </IconButton>
-                  </ThemeProvider>
-                  <p
-                    style={{
-                      width: "100%",
-                      marginRight: "20px",
-                      color: "#333",
-                    }}
-                  >
-                    hci@ucla
-                  </p>
-                </div>
-              </>
+                  <HelpOutlineIcon />
+                </IconButton>
+                <p>hci@ucla</p>
+              </div>
             </div>
           ),
         }[showbar]

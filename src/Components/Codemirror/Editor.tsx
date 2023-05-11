@@ -3,38 +3,49 @@
  *            https://codesandbox.io/s/codemirror6-t9ywwc?file=/src/index.js && https://discuss.codemirror.net/t/how-to-listen-to-changes-for-react-controlled-component/4506/4
  *
  *
+ * Editor --------------------------------------------------------------------
+ *
+ * This is the bulk of the project.
+ * There were some challenges that arose by using codemirror 6.
+ *
+ * Need to understand codemirror workflow.
+ *
+ * In essence the extensions provide most if not all of the functionality.
+ *
+ *
  */
 
+// Base for note editing in react
 import React, { useEffect, useRef, useState } from "react";
 import { EditorView } from "@codemirror/view";
 import { EditorState } from "@codemirror/state";
-
-import { annotation1, keymaps, togglePlaceholder } from "./keymaps";
-import { db, DismissLog, Highlight, Note, Placeholder } from "../Dexie/db";
-import { IndexableType } from "dexie";
-
-import "../Styles/Editor.css";
-import { cursorTooltip } from "./Extensions/CookMarks";
-
 import { history } from "@codemirror/commands";
 
+// Expresso features
+import { annotation1, keymaps, togglePlaceholder } from "./keymaps";
+import { cursorTooltip } from "./Extensions/CookMarks";
 import { toggleWith, toggleWith2 } from "./Extensions/toggleWith";
 import { metadatafacet, suggestionfacet } from "./Extensions/facets";
-
 import { placeholders } from "./Extensions/phViewPlugin";
-import { useLiveQuery } from "dexie-react-hooks";
-import { debounce } from "lodash";
 import { timeChecker } from "./Extensions/checkPauses";
 import { l2underline } from "./Extensions/textMarker";
+
+// For interacting with database + db types
+import { db, DismissLog, Highlight, Note, Placeholder } from "../Dexie/db";
+import { IndexableType } from "dexie";
+import { useLiveQuery } from "dexie-react-hooks";
+
+// extras
+import { debounce } from "lodash";
 import { FormControlLabel, FormGroup, Switch } from "@mui/material";
+
+import "../Styles/Editor.css";
 
 interface editorProps {
   view: EditorView | null;
   setView: React.Dispatch<React.SetStateAction<EditorView | null>>;
   currentNote: number | null;
   L2active: boolean;
-  // L1active: boolean;
-  // setL1active: React.Dispatch<React.SetStateAction<boolean>>;
   setL2active: React.Dispatch<React.SetStateAction<boolean>>;
   timespent: number;
   setTimespent: React.Dispatch<React.SetStateAction<number>>;
@@ -47,8 +58,6 @@ export function Editor({
   setView,
   currentNote,
   L2active,
-  // L1active,
-  // setL1active,
   setL2active,
   timespent,
   setTimespent,
@@ -70,12 +79,11 @@ export function Editor({
   const [highlight, setHighlight] = useState<Highlight | null>(null);
 
   const [dismisslist, setDismisslist] = useState<DismissLog[] | null>(null);
-  const [tim, setTim] = useState(0);
+  const [tim, setTim] = useState(0); // meant for better timekeeping for pause sensing
 
   const [L1active, setL1active] = useState<boolean>(false);
 
   const [timerEnabled, setTimerEnabled] = useState<boolean>(false);
-  const [deltaChanges, setDeltaChanges] = useState<number>(0);
 
   useEffect(() => {
     if (!timerEnabled) {
@@ -84,6 +92,7 @@ export function Editor({
   }, [L1active]);
 
   useEffect(() => {
+    console.log("cursor", cursor);
     // If cursor not at end of document - turn off timer
     if (view !== null) {
       if (cursor !== view.state.toJSON().doc.length) {
@@ -121,6 +130,7 @@ export function Editor({
         overflowY: "scroll",
         // -ms-overflow-style: none;  /* IE and Edge */
         scrollbarWidth: "none",
+        borderRadius: "2px",
       },
       "&.cm-editor": {
         scrollbarWidth: "none",
@@ -177,6 +187,7 @@ export function Editor({
     }
   };
 
+  // sync state with dexie tables
   useLiveQuery(async () => {
     const res = await db.placeholders.get(1);
     if (res !== undefined) {
@@ -212,8 +223,6 @@ export function Editor({
       return;
     }
 
-    // spacetester(fetchedNote?.content!);
-
     if (suggestion !== null) {
       db.logs.add({
         note: fetchedNote?.id!,
@@ -240,6 +249,7 @@ export function Editor({
         comments: null,
       });
     } else {
+      db.highlights.update(1, { active: false });
       db.logs.add({
         note: fetchedNote?.id!,
         realtime: Date.now(),
@@ -252,6 +262,7 @@ export function Editor({
   }, [L2active]);
 
   function getCursorLocation() {
+    console.log("in getsursorlocation");
     if (placeholderActive) {
       console.log("setting cursor to: ", suggestion!.location);
       return suggestion!.location;
@@ -276,27 +287,6 @@ export function Editor({
     db.highlights.update(1, { active: false });
   }, [currentNote]);
 
-  // function spacetester(content: string) {
-  //   let needspace = content.charAt(suggestion?.location! - 1) !== "*";
-  //   console.log("needspace", needspace);
-  //   let newcontent =
-  //     content.slice(0, suggestion?.location!) +
-  //     "*" +
-  //     content.slice(suggestion?.location!);
-
-  //   console.log("new target cursor:", suggestion?.location! + 1);
-  //   if (needspace) {
-  //     setSuggestion({
-  //       ...suggestion!,
-  //       location: suggestion?.location! + 1,
-  //       nocook: true,
-  //     });
-  //     return newcontent;
-  //   } else {
-  //     return content;
-  //   }
-  // }
-
   // 2. After contents have loaded, remake the editor
   React.useEffect(() => {
     if (editorRef.current === null) return;
@@ -305,7 +295,6 @@ export function Editor({
     setTitle(fetchedNote?.title);
 
     const state = EditorState.create({
-      // doc: placeholderActive ? spacetester(fetchedNote?.content): fetchedNote?.content,
       doc: fetchedNote?.content,
       selection: {
         anchor: getCursorLocation(),
@@ -328,6 +317,8 @@ export function Editor({
         L2active && highlight?.active ? [l2underline(highlight)] : [],
 
         keymaps,
+
+        // if placholder is toggled post suggestion to facet
         placeholderActive
           ? suggestionfacet.of({
               target: suggestion!.suggestion,
@@ -338,18 +329,14 @@ export function Editor({
             })
           : [],
 
-        // display ph
+        // suggestionfacet will be picked up in placeholders class plugin
         placeholderActive ? placeholders : [],
 
         // onchange listener ------------------------------------------------
         EditorView.updateListener.of(({ state, view, transactions }) => {
-          // console.log("in update listener");
-          console.log("suggestion facet: ", view.state.facet(suggestionfacet));
+          // console.log("suggestion facet: ", view.state.facet(suggestionfacet));
 
           transactions.forEach((tr) => {
-            if (tr.docChanged) {
-              setDeltaChanges(deltaChanges + 1);
-            }
             if (tr.annotation(annotation1) === "esc") {
               // setL2active(false);
             }
@@ -376,7 +363,7 @@ export function Editor({
       view.destroy();
       setView(null);
     };
-  }, [fetchedNote, dismisslist]);
+  }, [fetchedNote, dismisslist, L2active, highlight]);
 
   function handleTitleChange(e: React.FormEvent<HTMLInputElement>) {
     let newtitle: string = (e.target as HTMLInputElement).value;
@@ -384,6 +371,7 @@ export function Editor({
     saveTitle(newtitle);
   }
 
+  // there was an issue with using debounce. currently seems to work fine
   // const saveNoteContents = debounce(async (notetext: string) => {
   //   await db.notes.update(currentNote! as IndexableType, {
   //     content: notetext,
@@ -413,13 +401,7 @@ export function Editor({
   }, [showSave]);
 
   return (
-    <div
-      style={{
-        margin: "0 22vw 10px 30px",
-        width: "auto",
-        height: "90%",
-      }}
-    >
+    <div className="EditorContainer">
       <div className="note-header">
         <div className="notifiers">
           <p className="note-date">
@@ -431,18 +413,9 @@ export function Editor({
           </p>
           <p>{wordcount} words</p>
           <p>{Math.floor(timespent / 60000)} minutes</p>
-          {/* <p>Cursor: {cursor}</p> */}
           <p>{showSave ? "Saving" : ""}</p>
-          {/* <Saver deltachange={deltaChanges} /> */}
-          {/* <StopWatch start={timerEnabled} time={time} setTime={setTime} /> */}
-          {/* <button
-            onClick={() => {
-              setTimerEnabled(!timerEnabled);
-            }}
-          >
-            Stopwatch {timerEnabled ? "on" : "off"}
-          </button> */}
-          {/* <p>{keydownRate} kpm</p> */}
+          {/* FOR DEBUGGING:  ----------------- */}
+          {/* <p>Cursor: {cursor}</p> */}
         </div>
         <div className="headerrow">
           <input
@@ -484,7 +457,6 @@ export function Editor({
       <section
         ref={editorRef}
         style={{
-          // border: "5px solid var(--highlight2)",
           width: "100%",
           height: "100%",
           WebkitBoxSizing: "border-box" /* Safari/Chrome, other WebKit */,

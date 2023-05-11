@@ -1,5 +1,5 @@
 import React, { FC } from "react";
-import "../Styles/Tabs.css";
+import "../../Styles/Tabs.css";
 
 type TabsProps = {
   tabs: {
@@ -35,6 +35,7 @@ const Tabs: FC<TabsProps> = ({
       className={
         orientation === "vertical" ? className + " vertical" : className
       }
+      style={{ width: "100%" }}
     >
       <div role="tablist" aria-orientation={orientation}>
         {tabs.map((tab) => (
@@ -57,6 +58,7 @@ const Tabs: FC<TabsProps> = ({
         role="tabpanel"
         aria-labelledby={`btn-${selectedTab}`}
         id={`tabpanel-${selectedTab}`}
+        style={{ margin: "34px" }}
       >
         {Panel && <Panel.Component index={selectedTab} />}
       </div>

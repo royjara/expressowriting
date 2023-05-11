@@ -2,7 +2,7 @@ import React from "react";
 
 import ClearIcon from "@mui/icons-material/Clear";
 import { IconButton } from "@mui/material";
-import "../Styles/FAQ.css";
+import "../../Styles/FAQ.css";
 
 interface FAQprops {
   setViewHelp: React.Dispatch<React.SetStateAction<boolean>>;

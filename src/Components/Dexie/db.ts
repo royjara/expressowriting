@@ -73,9 +73,9 @@ export interface Logs {
 export interface Sidebar {
   id?: number;
   title: string;
-  // content: { [key: string]: string };
-  content: string | string[];
-  // content: string[];
+  content: { html: string; accent: string; label: string; }[];
+  highlight: string;
+  // content: string | string[];
   display: boolean;
   rephrase: boolean;
 }

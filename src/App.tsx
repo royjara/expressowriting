@@ -1,27 +1,30 @@
 /**
  * App.tsx - Entrypoint
  *
- * Journaling web application for mental health. Levels of intervention (L1, L2, L3) are implemented as text editing + UI features.
+ * Journaling web application for mental health.
+ * Levels of intervention (L1, L2, L3) are implemented as text editing + UI features.
  *
  */
 
 import { useEffect, useState } from "react";
 import { EditorView } from "@codemirror/view";
-import Menu from "./Components/UI/Menu";
-import FeedbackSidebar from "./Components/UI/FeedbackSidebar";
-import { Editor } from "./Components/Codemirror/Editor";
-import "./App.css";
-import Popup from "./Components/UI/Popup";
-import { db, Highlight } from "./Components/Dexie/db";
-import GraphBuilder from "./Components/Graphics/GraphBuilder";
-import ReactModal from "react-modal";
-import FAQ from "./Components/UI/FAQ";
-import Welcome from "./Components/UI/Welcome";
-import Onboarding from "./Components/UI/Onboarding";
-// import { useLiveQuery } from "dexie-react-hooks";
+import { db } from "./Components/Dexie/db";
 
-import HighlightContext from "./Contexts/HighlightContext";
-import Tabs from "./Components/UI/Tabs";
+// most of the work is here
+import { Editor } from "./Components/Codemirror/Editor";
+
+import ReactModal from "react-modal";
+
+import Tabs from "./Components/UI/Landing/Tabs";
+import Menu from "./Components/UI/Menu/Menu";
+import Popup from "./Components/UI/Popup";
+import FeedbackSidebar from "./Components/UI/FeedbackSidebar";
+import GraphBuilder from "./Components/Graphics/GraphBuilder";
+import FAQ from "./Components/UI/Menu/FAQ";
+import Welcome from "./Components/UI/Landing/Welcome";
+import Onboarding from "./Components/UI/Landing/Onboarding";
+
+import "./App.css";
 
 type TabsType = {
   label: string;
@@ -61,25 +64,20 @@ function App() {
   // tab menu
   const [selectedTab, setSelectedTab] = useState<number>(tabs[0].index);
 
-  // state refactor - start with highlights
-  // const highlightContext = HighlightContext();
-  const [highlight, setHighlight] = useState<Highlight>({
-    id: -1,
-    pos: { from: 0, to: 0 },
-    active: false,
-    color: null,
-  });
+  // needed for auto resetting feedback sidebar
+  const [feedbackKey, setFeedbackKey] = useState(1);
 
-  function updateHighlight(val: Highlight) {
-    setHighlight(val);
-  }
+  let feedbackKeyChange = () => {
+    setFeedbackKey(feedbackKey + 1);
+  };
 
   useEffect(() => {
     ReactModal.setAppElement("#root");
   }, []);
 
   useEffect(() => {
-    // on first load clear popups, sidebars, placeholders tables
+    // On first load clear popups, sidebars, highlight & placeholder tables
+    // Necessary when using Dexie.js as state
     setFeedbackbar(false);
     if (currentNote === null) {
       console.log("clearing state dbs");
@@ -92,7 +90,6 @@ function App() {
       setL2active(false);
       // setL1active(false);
     } else {
-      // log note opens
       db.logs.add({
         note: currentNote,
         realtime: Date.now(),
@@ -103,78 +100,47 @@ function App() {
   }, [currentNote]);
 
   return (
-    <div
-      className="App"
-      style={{
-        display: "flex",
-        flexDirection: "row",
-      }}
-    >
+    <div className="App">
       <Menu
         setCurrentNote={setCurrentNote}
         currentNote={currentNote}
         setShowmenu={setShowmenu}
         setViewHelp={setViewHelp}
       />
-      <header
-        className="App-header"
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          flex: 4,
-          border: "var(--borderdebug) red",
-          backgroundColor: "var(--bgcollight)",
-          // marginLeft: currentNote === null ? "30px" : "30px",
-          // marginRight: currentNote === null ? "30px" : "30px",
-          width: "100%",
-          alignItems: "center",
-        }}
-      >
-        <div
-          style={{
-            border: "var(--borderdebug) green",
-            width: "90%",
-            height: "100%",
-            // margin: "2vw",
-            display: "flex",
-
-            flexDirection: "column",
-          }}
-        >
-          {currentNote === null ? (
-            <>
-              <h1 className="homelogo noselect">Expresso+</h1>
-              {/* <h1 className="homelogo">Expresso+</h1> */}
-              <Tabs
-                selectedTab={selectedTab}
-                onClick={setSelectedTab}
-                tabs={tabs}
-              />
-            </>
-          ) : (
-            <>
-              <Popup
-                setFeedbackbar={setFeedbackbar}
-                currentNote={currentNote}
-                timespent={timespent}
-              />
-              <Editor
-                view={view}
-                setView={setView}
-                currentNote={currentNote}
-                L2active={L2active}
-                // L1active={L1active}
-                // setL1active={setL1active}
-                setL2active={setL2active}
-                timespent={timespent}
-                setTimespent={setTimespent}
-                L1trigger={L1trigger}
-                setL1trigger={setL1trigger}
-              />
-            </>
-          )}
-        </div>
-      </header>
+      <div className="App-header">
+        {currentNote === null ? (
+          <>
+            <h1 className="homelogo noselect">Expresso+</h1>
+            {/* <h1 className="homelogo">Expresso+</h1> */}
+            <Tabs
+              selectedTab={selectedTab}
+              onClick={setSelectedTab}
+              tabs={tabs}
+            />
+          </>
+        ) : (
+          <>
+            <Popup
+              setFeedbackbar={setFeedbackbar}
+              currentNote={currentNote}
+              timespent={timespent}
+            />
+            <Editor
+              view={view}
+              setView={setView}
+              currentNote={currentNote}
+              L2active={L2active}
+              // L1active={L1active}
+              // setL1active={setL1active}
+              setL2active={setL2active}
+              timespent={timespent}
+              setTimespent={setTimespent}
+              L1trigger={L1trigger}
+              setL1trigger={setL1trigger}
+            />
+          </>
+        )}
+      </div>
       <ReactModal
         isOpen={viewHelp}
         onRequestClose={() => {
@@ -200,6 +166,8 @@ function App() {
         feedbackbar={feedbackbar}
         timespent={timespent}
         L2active={L2active}
+        key={feedbackKey}
+        remounter={feedbackKeyChange}
       />
     </div>
   );

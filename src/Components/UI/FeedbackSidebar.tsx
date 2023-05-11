@@ -27,6 +27,7 @@ interface FeedbackSidebarProps {
   feedbackbar: boolean;
   timespent: number;
   L2active: boolean;
+  remounter: () => void;
 }
 
 export default function FeedbackSidebar({
@@ -35,11 +36,13 @@ export default function FeedbackSidebar({
   feedbackbar,
   timespent,
   L2active,
+  remounter,
 }: FeedbackSidebarProps) {
   const [data, setData] = useState<Sidebar | null>(null);
+  const [reload, setReload] = useState<boolean>(false);
   const transition = useTransition(feedbackbar, {
     config: {
-      mass: 6,
+      mass: 3,
       friction: 60,
       tension: 200,
     },
@@ -49,9 +52,19 @@ export default function FeedbackSidebar({
   });
 
   useEffect(() => {
-    // console.log("feedbackbar change in content", data);
-    setFeedbackbar(data?.display!);
-  }, [data]);
+    if (!reload) {
+      return;
+    }
+
+    if (data !== null) {
+      if (data?.content) {
+        if (!L2active) {
+          setFeedbackbar(false);
+        }
+        setFeedbackbar(data?.display);
+      }
+    }
+  }, [data, L2active]);
 
   useEffect(() => {
     if (currentNote !== null) {
@@ -78,6 +91,35 @@ export default function FeedbackSidebar({
     }
   }, [feedbackbar]);
 
+  let removeCard = (idx: number) => {
+    let safeRemount = () => {
+      setData(null);
+      setFeedbackbar(false);
+      remounter();
+    };
+
+    setReload(false);
+    if (data?.content !== null && Array.isArray(data?.content)) {
+      const newContent = [...data!.content];
+      newContent.splice(idx, 1);
+      if (newContent.length <= 0) {
+        safeRemount();
+      }
+      setData({ ...data!, content: newContent });
+    } else {
+      safeRemount();
+    }
+  };
+
+  useEffect(() => {
+    if (data === null) {
+      return;
+    }
+    if (data!.content === null || data!.content.length === 0) {
+      setFeedbackbar(false);
+    }
+  }, [data]);
+
   useLiveQuery(async () => {
     const result = await db.sidebars.get(1);
     if (result !== undefined) {
@@ -88,94 +130,103 @@ export default function FeedbackSidebar({
   });
 
   return (
-    <>
+    // OLD: -------------------------------------
+    // <>
+    //   {transition((style, item) =>
+    //     item ? (
+    //       <animated.div style={style} className="feedback-sidebar on">
+    //         <header>
+    //           <ThemeProvider theme={theme}>
+    //             <IconButton
+    //               onClick={() => setFeedbackbar(false)}
+    //               aria-label="delete"
+    //               color="primary"
+    //             >
+    //               <ClearIcon />
+    //             </IconButton>
+    //           </ThemeProvider>
+    //         </header>
+    //         <div className="Feedback">
+    //           <>
+    //             {data?.content !== null && Array.isArray(data?.content)
+    //               ? data!.content.map((html, idx) => {
+    //                   return (
+    //                     <div
+    //                       className="card"
+    //                       dangerouslySetInnerHTML={{ __html: html }}
+    //                     ></div>
+    //                   );
+    //                 })
+    //               : null}
+    //             {data?.content !== null && !Array.isArray(data?.content) ? (
+    //               <div
+    //                 className="card"
+    //                 dangerouslySetInnerHTML={{ __html: data!.content }}
+    //               ></div>
+    //             ) : null}
+    //           </>
+    //         </div>
+    //         <div className="rewrite-btn">
+    //           {data!.rephrase ? (
+    //             <ThemeProvider theme={theme}>
+    //               <Button
+    //                 onClick={() => {
+    //                   db.placeholders.update(1, { active: true });
+    //                 }}
+    //                 variant="contained"
+    //               >
+    //                 Rewrite
+    //               </Button>
+    //             </ThemeProvider>
+    //           ) : null}
+    //         </div>
+    //       </animated.div>
+    //     ) : (
+    //       <animated.div style={style} className="feedback-sidebar off">
+    //         {L2active === true && data?.content! ? (
+    //           <IconButton
+    //             onClick={() => {
+    //               setFeedbackbar(true);
+    //             }}
+    //           >
+    //             <NavigateBeforeIcon />
+    //           </IconButton>
+    //         ) : (
+    //           ""
+    //         )}
+    //       </animated.div>
+    //     )
+    //   )}
+    // </>
+
+    // New: -------------------------------------
+    <div className="SidebarContainer">
       {transition((style, item) =>
         item ? (
-          <animated.div style={style} className="feedback-sidebar on">
-            <header>
-              <ThemeProvider theme={theme}>
-                <IconButton
-                  onClick={() => setFeedbackbar(false)}
-                  aria-label="delete"
-                  color="primary"
-                >
-                  <ClearIcon />
-                </IconButton>
-              </ThemeProvider>
-            </header>
-            <div className="Feedback">
-              <>
-                {data?.content !== null && Array.isArray(data?.content)
-                  ? data!.content.map((html, idx) => {
-                      return (
-                        <div
-                          className="card"
-                          dangerouslySetInnerHTML={{ __html: html }}
-                        ></div>
-                      );
-                    })
-                  : null}
-                {data?.content !== null && !Array.isArray(data?.content) ? (
-                  <div
-                    className="card"
-                    dangerouslySetInnerHTML={{ __html: data!.content }}
-                  ></div>
-                ) : null}
-              </>
-            </div>
-            <div className="rewrite-btn">
-              {data!.rephrase ? (
-                <ThemeProvider theme={theme}>
-                  <Button
-                    onClick={() => {
-                      db.placeholders.update(1, { active: true });
-                    }}
-                    variant="contained"
-                  >
-                    Rewrite
-                  </Button>
-                </ThemeProvider>
-              ) : null}
-            </div>
+          <animated.div style={style} className="sidebarcardlist">
+            {/* SIDEBAR INTERFACE UPDATE - WILL ALWAYS BE ARRAY OF OBJECTS ----- */}
+            {data?.content !== null && Array.isArray(data?.content)
+              ? data!.content.map((card, idx) => {
+                  return (
+                    <>
+                      <SidebarCard
+                        key={idx}
+                        idx={idx}
+                        header={"header"}
+                        content={card}
+                        buttonoptions={["yes", "no"]}
+                        expanded={false}
+                        removeCard={removeCard}
+                      />
+                    </>
+                  );
+                })
+              : null}
           </animated.div>
         ) : (
-          <animated.div style={style} className="feedback-sidebar off">
-            {L2active === true && data?.content! ? (
-              <IconButton
-                onClick={() => {
-                  setFeedbackbar(true);
-                }}
-              >
-                <NavigateBeforeIcon />
-              </IconButton>
-            ) : (
-              ""
-            )}
-          </animated.div>
+          ""
         )
       )}
-    </>
-    // <div
-    //   className="SidebarContainer"
-    //   style={{
-    //     display: "flex",
-    //     flexDirection: "column",
-    //     width: "24vw",
-    //     margin: "20px",
-    //   }}
-    // >
-    //   <SidebarCard
-    //     header={"header"}
-    //     content={"some content"}
-    //     buttonoptions={["yes", "no"]}
-    //     expanded={true}
-    //   />
-    //   <SidebarCard
-    //     header={"header"}
-    //     content={"some content"}
-    //     buttonoptions={["yes", "no"]}
-    //     expanded={false}
-    //   />
-    // </div>
+    </div>
   );
 }

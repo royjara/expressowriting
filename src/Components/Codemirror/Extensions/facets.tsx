@@ -9,7 +9,7 @@ interface suggestiondata {
 }
 
 export const suggestionfacet = Facet.define<suggestiondata, suggestiondata>({
-  combine: (values) => values[0], // CAREFUL
+  combine: (values) => values[0], // CAREFUL!
 });
 
 export interface notemetadata {

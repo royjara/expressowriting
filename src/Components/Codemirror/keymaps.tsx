@@ -1,6 +1,5 @@
 import { EditorView, keymap } from "@codemirror/view";
 import { Annotation } from "@codemirror/state";
-import { sendToPy } from "./Extensions/sendToPy";
 import { db, Placeholder } from "../Dexie/db";
 import { L1_dict, dev_dict } from "../expressoDictionary";
 
@@ -37,19 +36,6 @@ export const keymaps = keymap.of([
       return true;
     },
   },
-  {
-    key: "Control-`",
-    preventDefault: true,
-    run: (view: EditorView) => {
-      console.log("control `!");
-      return false;
-    },
-  },
-  {
-    key: "Mod-p",
-    preventDefault: true,
-    run: sendToPy,
-  },
 ]);
 
 // MOVE TO CMHELPERS
@@ -58,10 +44,7 @@ export async function togglePlaceholder(
   type: "L1" | "L3",
   prevPh: Placeholder
 ) {
-  // console.log("CALLED TOGGLE PLACEHOLDER");
   if (type === "L3") {
-    // ----------------------------------------------------------------------------------------------------- toggling L3 options
-    // const res = await db.placeholders.get(1);
     let prevsuggestion = prevPh?.suggestion!;
     let triggerword = prevPh?.triggerword!;
 
@@ -91,7 +74,6 @@ export async function togglePlaceholder(
   } else {
     // -------------------------------------------------------------------------------------------------- L1 options
     if (prevPh?.active === false) {
-      // console.log("on create suggestion L1");
       // ------------------------------------------------------------------------------------------------ Create suggestion
       // using only words from last two lines
       let text = view.state.doc.toJSON().slice(-2);
@@ -130,7 +112,7 @@ export async function togglePlaceholder(
         );
         triggerw = filteredwords[0];
       }
-      // console.log("availableoptions[0]", availableoptions[0]);
+      console.log("availableoptions[0]", availableoptions[0]);
 
       if (prevPh !== undefined) {
         // update
@@ -188,7 +170,6 @@ export async function togglePlaceholder(
       const res = await db.placeholders.get(1);
       if (res !== undefined) {
         // update
-
         await db.placeholders.update(1, {
           active: true,
           origin: "L1",

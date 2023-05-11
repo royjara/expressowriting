@@ -1,7 +1,6 @@
 .menu-sidebar {
   z-index: 4;
   flex: 1;
-  /* background-color: var(--bgcolshadow); */
   background-color: rgba(235, 230, 255, 0.8);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
@@ -143,4 +142,20 @@
 .newentrybutton:hover {
   font-weight: 500;
   background: #c370ff47;
+}
+
+
+.menu-footer {
+  position: absolute;
+  width: 230px;
+  bottom: 0px;
+  right: 30px;
+  display: flex;
+  align-items: center;
+}
+
+.menu-footer > p {
+  width: 100%;
+  margin-right: 20px;
+  color: #333;
 }

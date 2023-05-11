@@ -1,62 +1,68 @@
-import React, { useEffect, useState } from "react";
-import CatLabel from "./CatLabel";
+import React, { useState } from "react";
+import CatLabel from "./CategoryLabel";
 import "../Styles/SidebarCard.css";
-import Button from "@mui/material/Button";
+// import Button from "@mui/material/Button";
+import IconButton from "@mui/material/IconButton";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import HighlightOffIcon from "@mui/icons-material/HighlightOff";
 
 interface sidebarcardprops {
+  idx: number;
   header: string;
-  content: string;
+  content: { html: string; accent: string; label: string };
   buttonoptions: string[];
   expanded: boolean;
+  // html: string;
+  removeCard: (idx: number) => void;
 }
 
 export default function SidebarCard(props: sidebarcardprops) {
-  let [stateclass, setStateClass] = useState("");
+  let [expanded, setExpanded] = useState<boolean>(props.expanded);
 
-  useEffect(() => {
-    if (props.expanded) {
-      setStateClass("expanded");
-    } else {
-      setStateClass("");
-    }
-  }, [props.expanded]);
+  let handleExpand = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    setExpanded(!expanded);
+  };
 
-  //
+  let handleClose = () => {
+    props.removeCard(props.idx);
+  };
 
   return (
-    <div className={"sidecard " + stateclass}>
+    <div className="sidecard" key={props.idx}>
       <div className="foldable">
-        <CatLabel
-          //   label={"\u26AB Details: Cognitive Distortion"}
-          label={"Details: Cognitive Distortion"}
-          palette={"lightblue"}
-        />
-        <p onClick={() => {}}>X</p>
-      </div>
-      {props.expanded ? (
-        // Need to rethink structure here! -----------------<<<<<<<
+        <CatLabel label={props.content.label} accent={props.content.accent} />
         <div>
-          <h3>{props.header}</h3>
-          <p>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-            eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim
-            ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
-            aliquip ex ea commodo consequat. Duis aute irure dolor in
-            reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
-            pariatur. Excepteur sint occaecat cupidatat non proident, sunt in
-            culpa qui officia deserunt mollit anim id est laborum.
-          </p>
-          {props.buttonoptions.map((astr) => (
-            <Button
-              size="small"
-              variant="outlined"
-              onClick={() => {}}
-              color="primary"
-            >
-              {astr}
-            </Button>
-          ))}
+          <IconButton
+            color="default"
+            aria-label="Expand Card"
+            component="button"
+            style={{
+              borderRadius: "12px",
+              margin: "0 3px",
+              padding: "1px",
+            }}
+            onClick={(e) => handleExpand(e)}
+          >
+            <ExpandMoreIcon />
+          </IconButton>
+          <IconButton
+            color="default"
+            aria-label="Close Card"
+            component="button"
+            style={{
+              borderRadius: "24px",
+              margin: "0 3px",
+              padding: "1px",
+            }}
+            onClick={() => handleClose()}
+          >
+            <HighlightOffIcon />
+          </IconButton>
         </div>
+      </div>
+      {expanded ? (
+        // Need to rethink structure here! -----------------<<<<<<<-----------------<<<<<<<
+        <div dangerouslySetInnerHTML={{ __html: props.content.html }} />
       ) : null}
     </div>
   );

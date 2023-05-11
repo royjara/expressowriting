@@ -1,3 +1,12 @@
+.EditorContainer {
+  /* margin:0 22vw 10px 30px; */
+  position: absolute;
+  left: 50px;
+  width: auto;
+  height: 90%;
+  
+}
+
 .note-header {
   display: flex;
   flex-direction: column;
@@ -7,15 +16,13 @@
 }
 
 .note-title {
-  /* border: 2px solid var(--highlight); */
   background-color: unset;
   border: none;
   font-size: 42px;
-  /* border: var(--borderdebug) cyan; */
+  outline: var(--borderdebug) cyan;
   font-family: inherit;
   color: rgb(74, 74, 74);
-  /* font-style: italic; */
-  width: 85%;
+  width: auto;
 }
 
 .note-title:focus {

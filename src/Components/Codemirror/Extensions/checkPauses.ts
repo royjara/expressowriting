@@ -21,7 +21,7 @@ export function timeChecker(
       timeaccumulator += timenow - lasttime;
       let pause = null as number | null;
       if (timenow - lasttime > pauseThreshold_ms) {
-        // only log pauses, to minimize logsize
+        // only log after pauses, to reduce logsize
         pause = timenow - lasttime;
         db.timelogs.add({
           note: note.id!,

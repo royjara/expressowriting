@@ -1,6 +1,6 @@
 import React, { useContext } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
-import { db } from "../Dexie/db";
+import { db } from "../../Dexie/db";
 import { IconButton, Tooltip } from "@mui/material";
 // import ClearIcon from "@mui/icons-material/Clear";
 import DeleteIcon from "@mui/icons-material/Delete";

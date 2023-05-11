@@ -33,14 +33,18 @@
 }
 
 .homelogo {
-  font-size: 64px;
-  margin-top: 0;
-  margin-bottom: 0;
-  margin-left: 0;
-  text-align: center;
+  text-align: left;
+  font-size: 54px;
   font-weight: 500;
-  color: gray;
   letter-spacing: -2px;
+
+  margin-top: 0;
+  margin-bottom: 10px;
+  padding-left: 100px;
+  color: gray;
+
+  position: absolue;
+  width: 100%;
 }
 
 .App-header {
@@ -48,12 +52,14 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  /* justify-content: flex-starts; */
-  /* font-size: calc(10px + 2vmin); */
   overflow: hidden;
   flex-grow: 1;
-  /* min-width: 100%; */
-  /* left: 0; */
+  outline: var(--borderdebug) red;
+  background-color: var(--bgcollight);
+  width: calc(100% - 35px); 
+  left: 35px;
+  position: absolute;
+  align-items: center;
 }
 
 .noselect {

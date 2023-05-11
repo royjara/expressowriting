@@ -1,3 +1,11 @@
+/**
+ * Handles placeholder interaction+element creation
+ *
+ * - If you wanted to let user stray from suggestion, and update suggestion to keep continuosly nudging them
+ *   then this is the right file
+ *
+ */
+
 import { EditorState, RangeSetBuilder } from "@codemirror/state";
 import {
   Decoration,

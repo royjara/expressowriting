@@ -63,6 +63,7 @@ async function loadSidebar(item: ExtendedSearchResult) {
         id: 1,
         title: item.sidebarcontent.title,
         content: item.sidebarcontent.content,
+        highlight: item.sidebarcontent.highlight,
         display: false,
         rephrase: item.sidebarcontent.rephrase,
       });
@@ -195,7 +196,7 @@ function getCursorTooltips(
           accumulator.push(currentValue);
         }
       }
-      console.log("acc", accumulator);
+      // console.log("acc", accumulator);
       return accumulator;
     },
     [] as ExtendedSearchResult[]

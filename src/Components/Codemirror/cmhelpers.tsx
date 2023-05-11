@@ -163,6 +163,7 @@ export class Searcher {
                 title: "sidebar title",
                 display: false,
                 content: element.Sidebar_feedback!,
+                highlight: rgbcolstr,
                 rephrase: element.rewrite !== null,
               },
               placeholdercontent: {
