@@ -6,7 +6,7 @@
  * Editor --------------------------------------------------------------------
  *
  * This is the bulk of the project.
- * There were some challenges that arose by using codemirror 6.
+ * There were some challenges that arose by using codemirror 6 + react.
  *
  * Need to understand codemirror workflow.
  *
@@ -22,7 +22,8 @@ import { EditorState } from "@codemirror/state";
 import { history } from "@codemirror/commands";
 
 // Expresso features
-import { annotation1, keymaps, togglePlaceholder } from "./keymaps";
+import { keymaps } from "./keymaps";
+import { annotation1, togglePlaceholder } from "./cmhelpers";
 import { cursorTooltip } from "./Extensions/CookMarks";
 import { toggleWith, toggleWith2 } from "./Extensions/toggleWith";
 import { metadatafacet, suggestionfacet } from "./Extensions/facets";
@@ -42,8 +43,6 @@ import { FormControlLabel, FormGroup, Switch } from "@mui/material";
 import "../Styles/Editor.css";
 
 interface editorProps {
-  view: EditorView | null;
-  setView: React.Dispatch<React.SetStateAction<EditorView | null>>;
   currentNote: number | null;
   L2active: boolean;
   setL2active: React.Dispatch<React.SetStateAction<boolean>>;
@@ -54,8 +53,6 @@ interface editorProps {
 }
 
 export function Editor({
-  view,
-  setView,
   currentNote,
   L2active,
   setL2active,
@@ -64,7 +61,12 @@ export function Editor({
   L1trigger,
   setL1trigger,
 }: editorProps) {
+  /* Creates a reference to an HTML element using the `useRef` hook provided by React. Reference 
+  initialized to null. The `useRef` hook is used to create a mutable reference to an
+  element in the DOM.*/
   const editorRef = useRef<HTMLElement>(null);
+  const [view, setView] = useState<EditorView | null>(null);
+
   const [fetchedNote, setfetchedNote] = useState<Note | undefined>(undefined);
   const [title, setTitle] = useState<string | undefined>(undefined);
   const [showSave, setShowSave] = useState<boolean>(false);
@@ -83,37 +85,31 @@ export function Editor({
 
   const [L1active, setL1active] = useState<boolean>(false);
 
-  const [timerEnabled, setTimerEnabled] = useState<boolean>(false);
-
-  useEffect(() => {
-    if (!timerEnabled) {
-      setTimerEnabled(true);
-    }
-  }, [L1active]);
-
+  /* useEffect triggered whenever `cursor` changes. It checks that there is no `placeholder` and that periodic L1 suggestions
+     are enabled. Since roughly cursorchange == activity (so user has not paused), we reset the timeout that will trigger a new suggestion. */
   useEffect(() => {
     console.log("cursor", cursor);
-    // If cursor not at end of document - turn off timer
     if (view !== null) {
+      // If cursor not at end of document - turn off timer
       if (cursor !== view.state.toJSON().doc.length) {
+        // If timer doesn't exist, just return.
         if (tim !== 0) {
           window.clearTimeout(tim);
         }
         return;
       }
     }
-
     if (!placeholderActive && L1active) {
       if (tim !== 0) {
         window.clearTimeout(tim);
       }
-      setTimerEnabled(true);
+      // Double timeout: 1st will be triggered after 7 seconds, triggering L1 suggestion
+      // inner timeout will be triggered 2ms after to reset the state back to false.
       let x = window.setTimeout(() => {
         setTimeout(() => {
           setL1trigger(false);
         }, 2);
         setL1trigger(true);
-        setTimerEnabled(false);
       }, 7000);
       setTim(x);
     }
@@ -213,11 +209,13 @@ export function Editor({
     if (L1trigger && view !== null) {
       db.placeholders.get(1).then((res) => {
         togglePlaceholder(view, "L1", res!);
-        setTimerEnabled(false);
       });
     }
   }, [L1trigger]);
 
+  /* Use nocook flag to avoid infinite looping.
+     Effect is used to log new suggestions.
+  */
   useEffect(() => {
     if (suggestion?.nocook) {
       return;
@@ -261,13 +259,15 @@ export function Editor({
     }
   }, [L2active]);
 
-  function getCursorLocation() {
-    console.log("in getsursorlocation");
+  // IMPORTANT NOTE: This function sometimes gives out of range errors.
+  function getCursorLocation(content: string) {
+    console.log("in getcursorlocation");
+    console.log("setting cursor to: ", suggestion?.location);
     if (placeholderActive) {
       console.log("setting cursor to: ", suggestion!.location);
       return suggestion!.location;
     } else {
-      return cursor;
+      return content.length;
     }
   }
 
@@ -297,7 +297,7 @@ export function Editor({
     const state = EditorState.create({
       doc: fetchedNote?.content,
       selection: {
-        anchor: getCursorLocation(),
+        anchor: getCursorLocation(fetchedNote?.content),
         // anchor: 0,
       },
       extensions: [
@@ -338,7 +338,7 @@ export function Editor({
 
           transactions.forEach((tr) => {
             if (tr.annotation(annotation1) === "esc") {
-              // setL2active(false);
+              setL2active(false);
             }
           });
 
@@ -371,7 +371,10 @@ export function Editor({
     saveTitle(newtitle);
   }
 
-  // there was an issue with using debounce. currently seems to work fine
+  // There is an issue with using debounce on doc save.
+  // If remaking the editor(e.g.reloading extension), and editor hasn't saved latest changes,
+  // the old content will be reloaded and any current state will most likely be wrong.
+
   // const saveNoteContents = debounce(async (notetext: string) => {
   //   await db.notes.update(currentNote! as IndexableType, {
   //     content: notetext,
@@ -433,7 +436,6 @@ export function Editor({
                     checked={L1active}
                     onChange={(event, checked) => {
                       setL1active(checked);
-                      // setTimerEnabled(true);
                     }}
                   />
                 }

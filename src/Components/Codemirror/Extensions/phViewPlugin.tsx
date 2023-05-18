@@ -6,7 +6,7 @@
  *
  */
 
-import { EditorState, RangeSetBuilder } from "@codemirror/state";
+import { RangeSetBuilder } from "@codemirror/state";
 import {
   Decoration,
   DecorationSet,

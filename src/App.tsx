@@ -32,6 +32,11 @@ type TabsType = {
   Component: React.FC<{}>;
 }[];
 
+/* `const tabs` is an array of objects that define the different tabs available in the application.
+Each object has a `label` property that specifies the name of the tab, an `index` property that
+specifies the numerical index of the tab, and a `Component` property that specifies the React
+component that should be rendered when the tab is selected. This array is used to render the tab
+menu in the application. */
 const tabs: TabsType = [
   {
     label: "Welcome",
@@ -51,12 +56,11 @@ const tabs: TabsType = [
 ];
 
 function App() {
-  const [view, setView] = useState<EditorView | null>(null);
+  /* These are React hooks that define state variables and their corresponding setter functions. */
   const [currentNote, setCurrentNote] = useState<number | null>(null);
   const [showmenu, setShowmenu] = useState<boolean>(true);
   const [feedbackbar, setFeedbackbar] = useState<boolean>(false);
   const [L2active, setL2active] = useState<boolean>(false);
-  // const [L1active, setL1active] = useState<boolean>(false);
   const [L1trigger, setL1trigger] = useState<boolean>(false);
   const [timespent, setTimespent] = useState<number>(0);
   const [viewHelp, setViewHelp] = useState<boolean>(false);
@@ -65,12 +69,19 @@ function App() {
   const [selectedTab, setSelectedTab] = useState<number>(tabs[0].index);
 
   // needed for auto resetting feedback sidebar
-  const [feedbackKey, setFeedbackKey] = useState(1);
+  const [fKey, setFKey] = useState(1);
 
-  let feedbackKeyChange = () => {
-    setFeedbackKey(feedbackKey + 1);
+  /**
+   * The function that changes the component's key. Forces component to rerender.
+   * Added for modular cardbased feedback.
+   */
+  let sidebarfeedbackKeyChange = () => {
+    setFKey(fKey + 1);
   };
 
+  /* React hook that sets the root element of the React app for ReactModal. This is necessary for accessibility purposes, as 
+   it ensures that screen readers will properly navigate the modal content. The empty dependency array `[]`
+   ensures that this effect only runs once, on initial render. */
   useEffect(() => {
     ReactModal.setAppElement("#root");
   }, []);
@@ -126,12 +137,8 @@ function App() {
               timespent={timespent}
             />
             <Editor
-              view={view}
-              setView={setView}
               currentNote={currentNote}
               L2active={L2active}
-              // L1active={L1active}
-              // setL1active={setL1active}
               setL2active={setL2active}
               timespent={timespent}
               setTimespent={setTimespent}
@@ -166,8 +173,8 @@ function App() {
         feedbackbar={feedbackbar}
         timespent={timespent}
         L2active={L2active}
-        key={feedbackKey}
-        remounter={feedbackKeyChange}
+        key={fKey}
+        remounter={sidebarfeedbackKeyChange}
       />
     </div>
   );
